@@ -45,8 +45,9 @@ important_slots = ("HelmAquatic",
                     "WeaponA2",
                     "WeaponB2")
 
-def get_chars(token):
-    request_link = "https://api.guildwars2.com/v2/characters?access_token=" + token
+# TODO: substitute this with get_json?
+def get_chars():
+    request_link = "{0}/{1}?access_token={2}".format(base_api_url, CHARACTERS, token)
     response = urllib.request.urlopen(request_link)
 
     if response.getcode() == 200:
@@ -56,8 +57,7 @@ def get_chars(token):
         return chars_arr
 
 
-def get_char_equipment_ids(char, token):
-    api_wrapper = gw2api.ApiWrapper(token)
+def get_char_equipment_ids(api_wrapper, char):
     wear_ids = dict()
     inv_json = api_wrapper.get_json(CHARACTER, char)
     wear_json = inv_json['equipment']
@@ -68,34 +68,33 @@ def get_char_equipment_ids(char, token):
 
     return wear_ids
 
-def print_char_equipment_score(char, token):
-    char_equipment = get_char_equipment_ids(char, token)
-    char_eqip_score = 0
+def print_char_equipment_score(api_wrapper, char):
+    char_equipment = get_char_equipment_ids(api_wrapper, char)
+    char_equip_score = 0
     char_max_score = 0
-    for eq_slot in char_equipment:
-        eqip_id = char_equipment[eq_slot]
-        eq = gw2item.GW2Item(eqip_id)
+    for equip_slot in char_equipment:
+        equip_id = char_equipment[equip_slot]
+        equip_json = api_wrapper.get_json(ITEM, equip_id)
+        equip = gw2item.GW2Item(equip_json)
 
         slot_max_score = 80 * 1.1
-        slot_equip_score = eq.show_level() * eq.show_rarity_value()
+        slot_equip_score = equip.show_level() * equip.show_rarity_value()
 
         char_max_score += slot_max_score
-        char_eqip_score += slot_equip_score
+        char_equip_score += slot_equip_score
 
         if slot_equip_score < slot_max_score:
-            print("{0} score = {1}".format(eq_slot, slot_equip_score))
-            print("\trarity = {0}".format(eq.show_rarity()))
-            print("\tlevel = {0}".format(eq.show_level()))
+            print("{0} score = {1}".format(equip_slot, slot_equip_score))
+            print("\trarity = {0}".format(equip.show_rarity()))
+            print("\tlevel = {0}".format(equip.show_level()))
 
-
-    print("eq score is {0} out of {1}".format(char_eqip_score, char_max_score))
-
+    print("equipment score is {0} out of {1}".format(char_equip_score, char_max_score))
 
 def main():
-    
     c1 = personal_config['TOKEN']['char1']
     token = personal_config['TOKEN']['token']
-    print_char_equipment_score(c1, token)
+    api_wrapper = gw2api.ApiWrapper(token)
+    print_char_equipment_score(api_wrapper, c1)
 
 if __name__ == "__main__":
     main()

@@ -16,6 +16,7 @@ exceptions = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(exceptions)
 
 class ApiWrapper(object):
+
     base_api_url = "https://api.guildwars2.com/v2"
     token = ""
 
@@ -32,11 +33,9 @@ class ApiWrapper(object):
             request_url = "{0}/characters?access_token={1}".format(self.base_api_url, self.token)
 
         with urllib.request.urlopen(request_url) as response:
-           if response.getcode() == 200:
-                item_string = response.read().decode()
-                item_json = json.loads(item_string)
-                return item_json
-           else:
-                raise exceptions.ApiConnectionError(request_link, response.getcode()) 
-
-
+            if response.getcode() == 200:
+                response_string = response.read().decode()
+                response_json = json.loads(response_string)
+                return response_json
+            else:
+                raise exceptions.ApiConnectionError(request_link, response.getcode())

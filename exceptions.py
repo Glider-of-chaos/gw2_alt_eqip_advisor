@@ -21,5 +21,6 @@ class NoSuchItemError(Error):
         item_id -- id of an item that was not recognized by API
     """
 
-    def __init__(self, item_id):
-        self.item_id = item_id
+    def __init__(self):
+        pass
+        

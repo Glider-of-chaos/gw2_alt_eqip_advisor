@@ -16,7 +16,6 @@ spec = importlib.util.spec_from_file_location("exceptions", exceptions_path)
 exceptions = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(exceptions)
 
-
 class GW2Item:
 
     rarity_rating = {
@@ -31,17 +30,12 @@ class GW2Item:
             }
     item_string = ""
 
-    def __init__(self, item_id):
-        request_link = "https://api.guildwars2.com/v2/items/{0}".format(item_id)
-        pdb.set_trace()
-        with urllib.request.urlopen(request_link) as response:
-            if response.getcode() == 200:
-                self.item_string = response.read().decode()
-                self.item_json = json.loads(self.item_string)
-                if self.item_json['text'] == 'no such id':
-                    raise exceptions.NoSuchItemError(item_id)
-            else:
-                raise exceptions.ApiConnectionError(request_link, response.getcode())
+    def __init__(self, item_json):
+        #pdb.set_trace()
+        if 'text' in item_json and item_json['text'] == 'no such id':
+            raise exceptions.NoSuchItemError()
+        else:
+            self.item_json = item_json
 
     def show_type(self):
         return self.item_json["type"]
@@ -59,8 +53,4 @@ class GW2Item:
         #print(self.rarity_rating)
         rating = self.rarity_rating[rarity_str]
         return rating
-
-
-
-
 
