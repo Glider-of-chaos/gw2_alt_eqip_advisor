@@ -31,6 +31,9 @@ class ApiWrapper(object):
             request_url = "{0}/characters/{1}?access_token={2}".format(self.base_api_url, requested_id, self.token)
         if endpoint == 'characters':
             request_url = "{0}/characters?access_token={1}".format(self.base_api_url, self.token)
+        if endpoint == 'bank':
+            request_url = "{0}/account/bank?access_token={1}".format(self.base_api_url, self.token)
+
 
         with urllib.request.urlopen(request_url) as response:
             if response.getcode() == 200:
