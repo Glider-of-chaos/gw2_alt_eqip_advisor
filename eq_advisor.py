@@ -147,41 +147,46 @@ def print_char_equipment_score(api_wrapper, char):
 
     print("equipment score is {0} out of {1}".format(char_equip_score, char_max_score))
 
-def find_runaway_soulbound(api_wrapper, char):
+def find_runaway_soulbound(api_wrapper):
     runaways = list()
-    print("looking for runaway soulbound items for {0}".format(char))
     chars = get_chars()
+    char_jsons = dict()
+    for char in chars:
+        char_jsons[char] = api_wrapper.get_json(CHARACTER, char)
     # starting with bank
     bank_json = api_wrapper.get_json(BANK)
-    
     pdb.set_trace()
-    for bank_item in bank_json:
-        #print('=======================')
-        #print(bank_item)
-        #print(type(bank_item))
-        #bank_item = bank_json[bank_item_key]
-        if bank_item != None:
-            if 'binding' in bank_item:
-                if bank_item['binding'] == 'Character':
-                    if bank_item['bound_to'] == char:
-                        runaways.append(('bank', bank_item['id']))
-    for other_char in chars:
-        if other_char != char:
-            other_char_json = api_wrapper.get_json(CHARACTER, other_char)
-            other_char_bags = other_char_json['bags']
-            for bag in other_char_bags:
-                for other_char_item in bag['inventory']:
-                    if other_char_item != None:
-                        if 'binding' in other_char_item:
-                            if other_char_item['binding'] == 'Character':
-                                if other_char_item['bound_to'] == char:
-                                    runaways.append((other_char, other_char_item['id']))
+    for char in chars:
+        print("looking for runaway soulbound items for {0}".format(char))
+        for bank_item in bank_json:
+            #print('=======================')
+            #print(bank_item)
+            #print(type(bank_item))
+            #bank_item = bank_json[bank_item_key]
+            if bank_item != None:
+                if 'binding' in bank_item:
+                    if bank_item['binding'] == 'Character':
+                        if bank_item['bound_to'] == char:
+                            runaways.append((char, 'bank', bank_item['id']))
+        for other_char in chars:
+            if other_char != char:
+                other_char_json = char_jsons[other_char]
+                other_char_bags = other_char_json['bags']
+                for bag in other_char_bags:
+                    for other_char_item in bag['inventory']:
+                        if other_char_item != None:
+                            if 'binding' in other_char_item:
+                                if other_char_item['binding'] == 'Character':
+                                    if other_char_item['bound_to'] == char:
+                                        runaways.append((char, other_char, other_char_item['id']))
     print(runaways)
     print("and now with additional flare")
+    pdb.set_trace()
     for runaway in runaways:
-        item = gw2item.GW2Item(runaway[1])
-        item_name = item['name']
-        print ("{0} - holds - {1}".format(runaway[0], item_name))
+        item_json = api_wrapper.get_json(ITEM, runaway[2])
+        item = gw2item.GW2Item(item_json)
+        item_name = item.show_name()
+        print ("{0} - his item named {2} ran to - {1}".format(runaway[0], runaway[1], item_name))
 
 
 
@@ -192,7 +197,7 @@ def main():
     token = personal_config['TOKEN']['token']
     api_wrapper = gw2api.ApiWrapper(token)
     #print_char_equipment_score(api_wrapper, c1)
-    find_runaway_soulbound(api_wrapper, c1)
+    find_runaway_soulbound(api_wrapper)
 
 
 if __name__ == "__main__":

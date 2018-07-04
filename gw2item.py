@@ -46,6 +46,9 @@ class GW2Item:
     def show_rarity(self):
         return self.item_json["rarity"]
 
+    def show_name(self):
+        return self.item_json['name']
+
     def show_rarity_value(self):
         rarity_str = self.show_rarity()
         #pdb.set_trace()
