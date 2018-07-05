@@ -86,20 +86,6 @@ important_slots = ("HelmAquatic",
                     "WeaponA2",
                     "WeaponB2")
 
-# TODO: substitute this with get_json?
-def get_chars():
-    base_api_url = "https://api.guildwars2.com/v2"
-    token = personal_config['TOKEN']['token']
-    request_link = "{0}/{1}?access_token={2}".format(base_api_url, CHARACTERS, token)
-    response = urllib.request.urlopen(request_link)
-
-    if response.getcode() == 200:
-        chars_str = response.read().decode()
-        chars_str = chars_str.replace("\n", "").replace("[", "").replace("]", "").replace('"', "").replace("  ", "")
-        chars_arr = chars_str.split(",")
-        return chars_arr
-
-
 def get_char_wear_ids(api_wrapper, char):
     wear_ids = dict()
     inv_json = api_wrapper.get_json(CHARACTER, char)
@@ -149,20 +135,17 @@ def print_char_equipment_score(api_wrapper, char):
 
 def find_runaway_soulbound(api_wrapper):
     runaways = list()
-    chars = get_chars()
+    chars = api_wrapper.get_json(CHARACTERS)
+    #pdb.set_trace()
     char_jsons = dict()
     for char in chars:
         char_jsons[char] = api_wrapper.get_json(CHARACTER, char)
     # starting with bank
     bank_json = api_wrapper.get_json(BANK)
-    pdb.set_trace()
+    #pdb.set_trace()
     for char in chars:
         print("looking for runaway soulbound items for {0}".format(char))
         for bank_item in bank_json:
-            #print('=======================')
-            #print(bank_item)
-            #print(type(bank_item))
-            #bank_item = bank_json[bank_item_key]
             if bank_item != None:
                 if 'binding' in bank_item:
                     if bank_item['binding'] == 'Character':
