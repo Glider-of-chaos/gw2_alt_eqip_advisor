@@ -23,6 +23,16 @@ spec = importlib.util.spec_from_file_location("gw2apiwrapper", gw2apiwrapper_pat
 gw2api = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gw2api)
 
+db_connector_path = os.path.join(current_dir, 'db_connector.py')
+spec = importlib.util.spec_from_file_location("db_connector", db_connector_path)
+db_connector = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(db_connector)
+
+exceptions_path = os.path.join(current_dir, 'exceptions.py')
+spec = importlib.util.spec_from_file_location("exceptions", exceptions_path)
+exceptions = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(exceptions)
+
 CHARACTER = 'character'
 CHARACTERS = 'characters'
 ITEM = 'item'
@@ -106,8 +116,11 @@ def get_char_all_items(api_wrapper, char):
 
     bags_json = inv_json['bags']
     for bag in bags_json:
-        for item in bag:
-            item_ids.append(item['id'])
+        bag_contents = bag['inventory']
+        for item in bag_contents:
+            if item != None:
+                #pdb.set_trace()
+                item_ids.append(item['id'])
 
     return item_ids
 
@@ -132,6 +145,51 @@ def print_char_equipment_score(api_wrapper, char):
             print("\tlevel = {0}".format(equip.show_level()))
 
     print("equipment score is {0} out of {1}".format(char_equip_score, char_max_score))
+
+def get_inv_data(api_wrapper):
+    chars = api_wrapper.get_json(CHARACTERS)
+    char_jsons = dict()
+    dbc = db_connector.DBConnector()
+
+    for char in chars:
+        char_jsons[char] = api_wrapper.get_json(CHARACTER, char)
+    bank_json = api_wrapper.get_json(BANK)
+    for bank_item in bank_json:
+        if bank_item != None:
+            item_id = bank_item['id']
+            try:
+                item_json = dbc.get_item_json(item_id)
+            except db_connector.exceptions.NoItemInDBError:
+                try:
+                    item_json = api_wrapper.get_json(ITEM, item_id)
+                    dbc.add_item(item_id, item_json)
+                except urllib.error.HTTPError as err:
+                    print('failed to get an item {0}'.format(item_id))
+                    print(err)
+                except Exception as err:
+                    print('getting item from api and adding to db failed')
+                    print(err)
+            except Exception as err:
+                print('getiing item from db failed with unknow error')
+                print(err)
+    for char in chars:
+        char_item_ids = get_char_all_items(api_wrapper, char)
+        for item_id in char_item_ids:
+            try:
+                item_json = dbc.get_item_json(item_id)
+            except db_connector.exceptions.NoItemInDBError:
+                try:
+                    item_json = api_wrapper.get_json(ITEM, item_id)
+                    dbc.add_item(item_id, item_json)
+                except urllib.error.HTTPError as err:
+                    print('failed to get an item {0}'.format(item_id))
+                    print(err)
+                except Exception as err:
+                    print('getting item from api and adding to db failed')
+                    print(err)
+            except Exception as err:
+                print('getiing item from db failed with unknow error')
+                print(err)
 
 def find_runaway_soulbound(api_wrapper):
     runaways = list()
@@ -179,8 +237,13 @@ def main():
     c1 = personal_config['TOKEN']['char1']
     token = personal_config['TOKEN']['token']
     api_wrapper = gw2api.ApiWrapper(token)
+    dbc = db_connector.DBConnector()
     #print_char_equipment_score(api_wrapper, c1)
-    find_runaway_soulbound(api_wrapper)
+    #find_runaway_soulbound(api_wrapper)
+    #tst_json = dbc.get_item_json('3')
+    #print(tst_json)
+    #print(type(tst_json))
+    get_inv_data(api_wrapper)
 
 
 if __name__ == "__main__":
