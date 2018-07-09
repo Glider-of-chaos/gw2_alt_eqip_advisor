@@ -14,7 +14,7 @@ class ApiConnectionError(Error):
         self.request_url = request_url
         self.response_code = response_code
 
-class NoSuchItemError(Error):
+class NoAPIItemError(Error):
     """Raised when API returned no such item response
     
     Attributes:
@@ -24,7 +24,7 @@ class NoSuchItemError(Error):
     def __init__(self):
         pass
 
-class NoItemInDBError(Error):
+class NoDBItemError(Error):
     """Raised when item id is not present in database
     Attributes:
         item_id -- id of an item that was not found"""
@@ -33,8 +33,11 @@ class NoItemInDBError(Error):
         self.item_id = item_id
 
 
-class MultiplesWnenExpectingSingletonDBError(Error):
+class TooManyRowsDBError(Error):
     """Raised when database finds multiple items for the query
     Attributes:
         query -- query that got more than one item when only one was expected"""
+
+    def __init(self, query):
+        self.query = query
         

@@ -24,7 +24,7 @@ class ApiWrapper(object):
     def __init__(self, token):
         self.token = token
     
-    def get_json(self, endpoint, requested_id = ""):
+    def get_json_string(self, endpoint, requested_id = ""):
 
         if endpoint == 'item':
             request_url = "{0}/items/{1}".format(self.base_api_url, requested_id)
@@ -40,7 +40,7 @@ class ApiWrapper(object):
         with urllib.request.urlopen(request_url) as response:
             if response.getcode() == 200:
                 response_string = response.read().decode()
-                response_json = json.loads(response_string)
-                return response_json
+                #response_json = json.loads(response_string)
+                return response_string
             else:
                 raise exceptions.ApiConnectionError(request_link, response.getcode())

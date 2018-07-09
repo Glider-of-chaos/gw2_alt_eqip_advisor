@@ -98,7 +98,7 @@ important_slots = ("HelmAquatic",
 
 def get_char_wear_ids(api_wrapper, char):
     wear_ids = dict()
-    inv_json = api_wrapper.get_json(CHARACTER, char)
+    inv_json = json.loads(api_wrapper.get_json_string(CHARACTER, char))
     wear_json = inv_json['equipment']
 
     for item in wear_json:
@@ -109,7 +109,7 @@ def get_char_wear_ids(api_wrapper, char):
 
 def get_char_all_items(api_wrapper, char):
     item_ids = list()
-    inv_json = api_wrapper.get_json(CHARACTER, char)
+    inv_json = json.loads(api_wrapper.get_json_string(CHARACTER, char))
     wear_json = inv_json['equipment']
     for item in wear_json:
         item_ids.append(item['id'])
@@ -130,7 +130,7 @@ def print_char_equipment_score(api_wrapper, char):
     char_max_score = 0
     for equip_slot in char_equipment:
         equip_id = char_equipment[equip_slot]
-        equip_json = api_wrapper.get_json(ITEM, equip_id)
+        equip_json = json.loads(api_wrapper.get_json_string(ITEM, equip_id))
         equip = gw2item.GW2Item(equip_json)
 
         slot_max_score = 80 * 1.1
@@ -146,60 +146,55 @@ def print_char_equipment_score(api_wrapper, char):
 
     print("equipment score is {0} out of {1}".format(char_equip_score, char_max_score))
 
+def get_item_string(db_conn, api_wrapper, item_id):
+    try:
+        item_str = db_conn.get_item_json(item_id)
+        item_json = json.loads(item_str)
+        return item_json
+    except db_connector.exceptions.NoDBItemError:
+        try:
+            item_json = api_wrapper.get_json_string(ITEM, item_id)
+            db_conn.add_item(item_id, str(item_json))
+            return item_json
+        except urllib.error.HTTPError as err:
+            print('failed to get an item {0}'.format(item_id))
+            print(err)
+            return None
+        except Exception as err:
+            print('getting item from api and adding to db failed')
+            print(err)
+            return None
+    except Exception as err:
+        print('getiing item from db failed with unknow error')
+        print(err)
+        return None
+
 def get_inv_data(api_wrapper):
-    chars = api_wrapper.get_json(CHARACTERS)
+    chars = json.loads(api_wrapper.get_json_string(CHARACTERS))
     char_jsons = dict()
     dbc = db_connector.DBConnector()
 
     for char in chars:
-        char_jsons[char] = api_wrapper.get_json(CHARACTER, char)
-    bank_json = api_wrapper.get_json(BANK)
+        char_jsons[char] = json.loads(api_wrapper.get_json_string(CHARACTER, char))
+    bank_json = json.loads(api_wrapper.get_json_string(BANK))
     for bank_item in bank_json:
         if bank_item != None:
             item_id = bank_item['id']
-            try:
-                item_json = dbc.get_item_json(item_id)
-            except db_connector.exceptions.NoItemInDBError:
-                try:
-                    item_json = api_wrapper.get_json(ITEM, item_id)
-                    dbc.add_item(item_id, item_json)
-                except urllib.error.HTTPError as err:
-                    print('failed to get an item {0}'.format(item_id))
-                    print(err)
-                except Exception as err:
-                    print('getting item from api and adding to db failed')
-                    print(err)
-            except Exception as err:
-                print('getiing item from db failed with unknow error')
-                print(err)
+            item_json = get_item_string(dbc, api_wrapper, item_id)
     for char in chars:
         char_item_ids = get_char_all_items(api_wrapper, char)
         for item_id in char_item_ids:
-            try:
-                item_json = dbc.get_item_json(item_id)
-            except db_connector.exceptions.NoItemInDBError:
-                try:
-                    item_json = api_wrapper.get_json(ITEM, item_id)
-                    dbc.add_item(item_id, item_json)
-                except urllib.error.HTTPError as err:
-                    print('failed to get an item {0}'.format(item_id))
-                    print(err)
-                except Exception as err:
-                    print('getting item from api and adding to db failed')
-                    print(err)
-            except Exception as err:
-                print('getiing item from db failed with unknow error')
-                print(err)
+            item_json = get_item_string(dbc, api_wrapper, item_id)
 
 def find_runaway_soulbound(api_wrapper):
     runaways = list()
-    chars = api_wrapper.get_json(CHARACTERS)
+    chars = json.loads(api_wrapper.get_json_string(CHARACTERS))
     #pdb.set_trace()
     char_jsons = dict()
     for char in chars:
-        char_jsons[char] = api_wrapper.get_json(CHARACTER, char)
+        char_jsons[char] = json.loads(api_wrapper.get_json_string(CHARACTER, char))
     # starting with bank
-    bank_json = api_wrapper.get_json(BANK)
+    bank_json = json.loads(api_wrapper.get_json_string(BANK))
     #pdb.set_trace()
     for char in chars:
         print("looking for runaway soulbound items for {0}".format(char))
@@ -224,14 +219,10 @@ def find_runaway_soulbound(api_wrapper):
     print("and now with additional flare")
     pdb.set_trace()
     for runaway in runaways:
-        item_json = api_wrapper.get_json(ITEM, runaway[2])
+        item_json = json.loads(api_wrapper.get_json_string(ITEM, runaway[2]))
         item = gw2item.GW2Item(item_json)
         item_name = item.show_name()
         print ("{0} - his item named {2} ran to - {1}".format(runaway[0], runaway[1], item_name))
-
-
-
-
 
 def main():
     c1 = personal_config['TOKEN']['char1']
@@ -240,7 +231,7 @@ def main():
     dbc = db_connector.DBConnector()
     #print_char_equipment_score(api_wrapper, c1)
     #find_runaway_soulbound(api_wrapper)
-    #tst_json = dbc.get_item_json('3')
+    #tst_json = dbc.get_item_json_string('3')
     #print(tst_json)
     #print(type(tst_json))
     get_inv_data(api_wrapper)

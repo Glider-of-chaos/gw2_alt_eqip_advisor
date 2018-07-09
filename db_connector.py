@@ -40,7 +40,7 @@ class DBConnector():
             connection.close()
         elif row_count == 0:
             connection.close()
-            raise exceptions.NoItemInDBError(item_id)
+            raise exceptions.NoDBItemError(item_id)
         else:
             connection.close()
             raise exceptions.MultiplesWnenExpectingSingletonDBError(item_select)
@@ -52,7 +52,7 @@ class DBConnector():
         cursor = connection.cursor()
         item_data = (item_id, str(item_json))
 
-        item_insert = ("INSERT INTO items (item_id, item_json) VALUES (%s, %s)")
+        item_insert = ('INSERT INTO items (item_id, item_json) VALUES (%s, %s)')
         #pdb.set_trace()
 
         cursor.execute(item_insert, item_data)
