@@ -16,7 +16,7 @@ spec = importlib.util.spec_from_file_location("exceptions", exceptions_path)
 exceptions = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(exceptions)
 
-class GW2Item:
+class ItemSlot:
 
     rarity_rating = {
             "Junk" : 0,
@@ -28,26 +28,79 @@ class GW2Item:
             "Ascended" : 1.1,
             "Legendary" : 1.1
             }
-    item_string = ""
 
-    def __init__(self, item_json):
+    def __init__(self, slot_string, location, id_string):
         #pdb.set_trace()
-        if 'text' in item_json and item_json['text'] == 'no such id':
-            raise exceptions.NoSuchItemError()
+        self.flat_dict = {'rarity': 'Junk',
+                        'level': 0}
+        self.attributes_json = {'AgonyResistance': 0,
+                            'BoonDuration': 0,
+                            'ConditionDamage': 0,
+                            'ConditionDuration': 0,
+                            'CritDamage': 0,
+                            'Healing': 0,
+                            'Power': 0,
+                            'Precision': 0,
+                            'Toughness': 0,
+                            'Vitality': 0}
+        if slot_string == None:
+            self.flat_dict['empty'] = True
         else:
-            self.item_json = item_json
+            self.flat_dict['empty'] = False
+            self.location = location
+            self.slot_string = slot_string
+            self.slot_json = json.loads(slot_string)
+
+            if 'slot' in self.slot_json:
+                self.flat_dict['equipped'] = True
+            else:
+                self.flat_dict['equipped'] = False
+
+            if 'stats' in self.slot_json:
+                self.attributes_json = self.slot_json['stats']['attributes']
+
+            if 'binding' in self.slot_json:
+                self.flat_dict['binding'] = self.slot_json['binding']
+                if 'bound_to' in self.slot_json:
+                    self.flat_dict['bound_to'] = self.slot_json['bound_to']
+            
+        if id_string == None:
+            self.flat_dict['empty_id'] = True
+        else:
+            self.id_string = id_string
+            self.id_json = json.loads(id_string)
+            self.flat_dict['name'] = self.id_json['name']
+            if 'type' in self.id_json:
+                self.flat_dict['type'] = self.id_json['type']
+            if 'level' in self.id_json:
+                self.flat_dict['level'] = self.id_json['level']
+            if 'rarity' in self.id_json:
+                self.flat_dict['rarity'] = self.id_json['rarity']
+            if 'icon' in self.id_json:
+                self.flat_dict['icon'] = self.id_json['icon']
+            if 'details' in self.id_json:
+                details_json = self.id_json['details']
+                if 'type' in details_json:
+                    self.flat_dict['deep_type'] = details_json['type']
+                if 'weight_class' in details_json:
+                    self.flat_dict['armor_weight'] = details_json['weight_class']
+                if 'infix_upgrade' in details_json:
+                    att_json = details_json['infix_upgrade']['attributes']
+                    for att in att_json:
+                        self.attributes_json[att['attribute']] = att['modifier']
+
 
     def show_type(self):
-        return self.item_json["type"]
+        return self.flat_dict["type"]
 
     def show_level(self):
-        return int(self.item_json["level"])
+        return self.flat_dict["level"]
 
     def show_rarity(self):
-        return self.item_json["rarity"]
+        return self.flat_dict["rarity"]
 
     def show_name(self):
-        return self.item_json['name']
+        return self.flat_dict['name']
 
     def show_rarity_value(self):
         rarity_str = self.show_rarity()

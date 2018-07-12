@@ -130,8 +130,8 @@ def print_char_equipment_score(api_wrapper, char):
     char_max_score = 0
     for equip_slot in char_equipment:
         equip_id = char_equipment[equip_slot]
-        equip_json = json.loads(api_wrapper.get_json_string(ITEM, equip_id))
-        equip = gw2item.GW2Item(equip_json)
+        equip_str = api_wrapper.get_json_string(ITEM, equip_id)
+        equip = gw2item.ItemSlot(None, char, equip_str)
 
         slot_max_score = 80 * 1.1
         slot_equip_score = equip.show_level() * equip.show_rarity_value()
@@ -234,7 +234,11 @@ def main():
     #tst_json = dbc.get_item_json_string('3')
     #print(tst_json)
     #print(type(tst_json))
-    get_inv_data(api_wrapper)
+    #get_inv_data(api_wrapper)
+    chars = json.loads(api_wrapper.get_json_string(CHARACTERS))
+    for char in chars:
+        print('Equipment for {0}'.format(char))
+        print_char_equipment_score(api_wrapper, char)
 
 
 if __name__ == "__main__":

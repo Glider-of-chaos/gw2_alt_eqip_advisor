@@ -37,10 +37,15 @@ class ApiWrapper(object):
             request_url = "{0}/account/bank?access_token={1}".format(self.base_api_url, self.token)
 
 
-        with urllib.request.urlopen(request_url) as response:
-            if response.getcode() == 200:
-                response_string = response.read().decode()
-                #response_json = json.loads(response_string)
-                return response_string
-            else:
-                raise exceptions.ApiConnectionError(request_link, response.getcode())
+        #pdb.set_trace()
+        try:
+            with urllib.request.urlopen(request_url) as response:
+                if response.getcode() == 200:
+                    response_string = response.read().decode()
+                    #response_json = json.loads(response_string)
+                    return response_string
+                else:
+                    raise exceptions.ApiConnectionError(request_link, response.getcode())
+        except urllib.error.HTTPError as err:
+            print("got an error trying to get item, error message {0}".format(err))
+            return None
