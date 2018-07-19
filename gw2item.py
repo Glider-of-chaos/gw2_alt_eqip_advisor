@@ -64,7 +64,7 @@ class ItemSlot:
                 if 'bound_to' in self.slot_json:
                     self.flat_dict['bound_to'] = self.slot_json['bound_to']
             
-        if id_string == None:
+        if id_string == 'None':
             self.flat_dict['empty_id'] = True
         else:
             self.id_string = id_string
@@ -89,9 +89,24 @@ class ItemSlot:
                     for att in att_json:
                         self.attributes_json[att['attribute']] = att['modifier']
 
+    def __repr__(self):
+        item_name = ''
+        if 'name' in self.flat_dict:
+            item_name = f'{self.flat_dict["name"]}'
+        else:
+            item_name = 'UNNAMED ITEM'
+
+        rep_string = f'{item_name} ({self.flat_dict["rarity"]}, level {self.flat_dict["level"]})'
+        return rep_string
 
     def show_type(self):
-        return self.flat_dict["type"]
+        if 'type' in self.flat_dict:
+            return self.flat_dict["type"]
+        else:
+            return None
+
+    def show_deep_type(self):
+        return self.flat_dict['deep_type']
 
     def show_level(self):
         return self.flat_dict["level"]
@@ -109,4 +124,11 @@ class ItemSlot:
         #print(self.rarity_rating)
         rating = self.rarity_rating[rarity_str]
         return rating
+
+    def show_att_score(self, att_values):
+        att_score = 0
+        for att in att_values:
+            att_score += self.attributes_json[att] * att_values[att]
+        return att_score
+
 

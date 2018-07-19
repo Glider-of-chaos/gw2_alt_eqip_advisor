@@ -26,11 +26,11 @@ class DBConnector():
         pass
         #self.curs.execute("insert into characters (char_name, char_json) values ('test_name', '{tst:json}')")
 
-    def get_item_json(self, item_id):
+    def get_item_json(self, item_type, item_id):
         connection = mysql.connector.connect(**self.connection_details)
         cursor = connection.cursor()
 
-        item_select = "SELECT item_json FROM items WHERE item_id = {0}".format(item_id)
+        item_select = "SELECT json_string FROM `{0}` WHERE id = '{1}'".format(item_type, item_id)
         cursor.execute(item_select)
         select_result = cursor.fetchall()
         #pdb.set_trace()
@@ -52,7 +52,7 @@ class DBConnector():
         cursor = connection.cursor()
         item_data = (item_id, str(item_json))
 
-        item_insert = ('INSERT INTO items (item_id, item_json) VALUES (%s, %s)')
+        item_insert = ('INSERT INTO item (id, json_string) VALUES (%s, %s)')
         #pdb.set_trace()
 
         cursor.execute(item_insert, item_data)
