@@ -258,16 +258,31 @@ def get_char_donations(api_wrapper, char_string, char_values):
                         personal_gear_items[personal_gear_type] = slot_item
                         for_donation = False
                         break
+        else:
+            for_donation = False
         if for_donation:
-            donations.append(filled_slot)
+            donations.append(slot_item)
 
+    #print('char equip:')
+    #print(personal_gear_items)
+    #print('donations:')
+    #print(donations)
 
-    print('char equip:')
-    print(personal_gear_items)
-    print('donations:')
-    print(donations)
+    return donations
 
-
+def find_best_deeptype_in_list(donations, deep_type, desired_stats):
+    result = list()
+    best_score = 0
+    for item in donations:
+        if item.show_rarity_value() > 0 and item.show_level() > 0:
+            if item.show_deep_type() == deep_type:
+                score = item.show_att_score(desired_stats)
+                if score > best_score:
+                    best_score = score
+                    result = [item]
+                elif score == best_score:
+                    result.append(item)
+    return result
 
 
 def find_runaway_soulbound(api_wrapper):
@@ -329,10 +344,20 @@ def main():
     #print('=============')
     #print(j_shadowloom_str)
     #print('=============')
-    jink_values =  { 'Power': 1.4,
+    jink_values = { 'Power': 1.4,
                 'Precision': 1,
                 'CritDamage':1}
-    get_char_donations(api_wrapper, j_shadowloom_str, jink_values)
+    cleric_values = { 'Healing': 1.4,
+                'Power': 1,
+                'Toughness':1}
+    awake_values = { 'Power': 1.4,
+                'BoonDuration': 1,
+                'Healing':1}
+    donations = get_char_donations(api_wrapper, j_shadowloom_str, jink_values)
+    #print(donations)
+    best_cleric_dagger = find_best_deeptype_in_list(donations, "Dagger", awake_values)
+    print(best_cleric_dagger.
+    print(best_cleric_dagger)
     
 
 if __name__ == "__main__":

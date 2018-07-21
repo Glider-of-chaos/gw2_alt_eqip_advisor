@@ -99,6 +99,9 @@ class ItemSlot:
         rep_string = f'{item_name} ({self.flat_dict["rarity"]}, level {self.flat_dict["level"]})'
         return rep_string
 
+    def show_location(self):
+        return self.location
+
     def show_type(self):
         if 'type' in self.flat_dict:
             return self.flat_dict["type"]
