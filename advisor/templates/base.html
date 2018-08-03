@@ -2,13 +2,13 @@
 <title>{% block title %}{% endblock %} - eq advisor</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <nav>
-    <h1>Eq Advisor</h1>
+    <h1>Eq Advisor -=[{{ g.api_key }}]=-</h1>
     <ul>
         {% if g.api_key %}
-            <li><span>{{ g.api_key['status'] }}</span>
-            <li><a href="{{ url_for('api_key.change') }}">Chage key</a>
+            <li><a href="{{ url_for('key.set_api_key') }}">Chage key ({{ g.api_key }})</a>
+            <li><a href="{{ url_for('chars.char_list') }}">Character list</a>
         {% else %}
-            <li><a href="{{ url_for('api_key.change') }}">Set key</a>
+            <li><a href="{{ url_for('key.set_api_key') }}">Set key</a>
         {% endif %}
     </ul>
 </nav>
@@ -17,7 +17,7 @@
         {% block header %}{% endblock %}
     </header>
     {% for message in get_flashed_messages() %}
-        <div> class="flash">{{ message }}</div>
+        <div class="flash">{{ message }}</div>
     {% endfor %}
     {% block content %}{% endblock %}
 </section>

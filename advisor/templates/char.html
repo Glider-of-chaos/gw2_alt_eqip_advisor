@@ -1,8 +1,7 @@
-<!doctype html>
-<html>
-    <body>
-        <h1>Test char json</h1>
-        <br/>
-        <p>{{ content }}</p>
-    </body>
-</html>
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Char{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+{{ content }}
+{% endblock %}

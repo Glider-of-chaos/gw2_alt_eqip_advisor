@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}API key change{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<form method = "post">
+    <input type="text" name="api_key" id="api_key">
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

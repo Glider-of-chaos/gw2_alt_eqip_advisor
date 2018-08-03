@@ -26,4 +26,10 @@ def create_app(test_config  =None):
     from . import db_connector
     db_connector.init_app(app)
 
+    from . import chars
+    app.register_blueprint(chars.char_blueprint)
+
+    from . import acc
+    app.register_blueprint(acc.key_blueprint)
+
     return app
