@@ -2,7 +2,7 @@
 <title>{% block title %}{% endblock %} - eq advisor</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <nav>
-    <h1>Eq Advisor -=[{{ g.api_key }}]=-</h1>
+    <h1>Eq Advisor (API key = {{ g.api_key }})</h1>
     <ul>
         {% if g.api_key %}
             <li><a href="{{ url_for('key.set_api_key') }}">Chage key ({{ g.api_key }})</a>

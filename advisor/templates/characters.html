@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Character list{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<ul>
+    {% for name in char_names %}
+    <li><a href="{{ url_for('chars.char', char_name = name) }}">{{ name }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
