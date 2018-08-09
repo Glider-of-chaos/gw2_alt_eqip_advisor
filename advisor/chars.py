@@ -5,8 +5,11 @@ from flask import (Blueprint, flash, g, redirect, render_template, request, sess
 from flask import Flask
 
 from .db_connector import get_db
+from .db_connector import exceptions
+from .db_connector import DBConnector
 
 from .gw2apiwrapper import ApiWrapper
+from .gw2item import ItemSlot
 
 char_blueprint = Blueprint('chars', __name__, url_prefix = '/char')
 
@@ -42,8 +45,13 @@ def char(char_name):
         if char_json is None:
             error = 'Character not found'
 
+        char_values = { 'Power': 1.4,
+                'Precision': 1,
+                'CritDamage':1}
+        char_personal_equip = get_char_personal_gear_items(char_json, char_values)
+
         flash(error)
-        return render_template('char.html', content = char_json, timestamp = creation_time)
+        return render_template('char.html', content = char_json, timestamp = creation_time, char_personal_equip = char_personal_equip)
 
 
 def char_filled_slots(char_string):
@@ -60,15 +68,15 @@ def char_filled_slots(char_string):
 
     return filled_slots
 
-def get_item_string(db_conn, api_wrapper, item_type, item_id):
+def get_item_string(db_conn, item_type, item_id):
     try:
         item_str = db_conn.get_item_json(item_type, item_id)
         #item_json = json.loads(item_str)
         #return item_json
         return item_str
-    except db_connector.exceptions.NoDBItemError:
+    except exceptions.NoDBItemError:
         try:
-            item_json = api_wrapper.get_json_string(ITEM, item_id)
+            #item_json = api_wrapper.get_json_string(ITEM, item_id)
             db_conn.add_item(item_id, str(item_json))
             return item_json
         except urllib.error.HTTPError as err:
@@ -84,13 +92,83 @@ def get_item_string(db_conn, api_wrapper, item_type, item_id):
         print(err)
         return None
 
-def get_char_personal_gear_items(api_wrapper, char_string, char_values):
-    dbc = db_connector.DBConnector()
+def get_char_personal_gear_items(char_string, char_values):
+
+
+    relevant_types = ('Armor',
+                'Weapon',
+                'Trinket',
+                'Back')
+
+    armor_count = {'HelmAquatic': 1,
+                'Backpack': 1,
+                'Coat': 1,
+                'Boots': 1,
+                'Gloves': 1,
+                'Helm': 1,
+                'Leggings': 1,
+                'Shoulders': 1,
+                'Accessory': 2,
+                'Ring': 2,
+                'Amulet': 1}
+
+    profession_armor = {'Guardian': 'Heavy',
+                    'Revenant': 'Heavy',
+                    'Warrior': 'Heavy',
+                    'Engineer': 'Medium',
+                    'Ranger': 'Medium',
+                    'Thief': 'Medium',
+                    'Elementalist': 'Light',
+                    'Mesmer': 'Light',
+                    'Necromancer': 'Light'}
+
+    important_slots = ("HelmAquatic",
+                        "Backpack",
+                        "Coat",
+                        "Boots",
+                        "Gloves",
+                        "Helm",
+                        "Leggings",
+                        "Shoulders",
+                        "Accessory1",
+                        "Accessory2",
+                        "Ring1",
+                        "Ring2",
+                        "Amulet",
+                        "WeaponAquaticA",
+                        "WeaponAquaticB",
+                        "WeaponA1",
+                        "WeaponA2",
+                        "WeaponB2")
+
+
+    dbc = get_db()
+    #db_connector.DBConnector()
     filled_slots = char_filled_slots(char_string)
     char_json = json.loads(char_string)
     prof = char_json['profession']
     armor_weight = profession_armor[prof]
-    personal_weapon_list = weapon_count_config[prof]
+    #personal_weapon_list = weapon_count_config[prof]
+
+    personal_weapon_list = {'Axe': 0,
+            'Dagger': 2,
+            'focus': 0,
+            'Greatsword': 0,
+            'Hammer': 0,
+            'HarpoonGun': 1,
+            'Longbow': 0,
+            'Mace': 0,
+            'Pistol': 2,
+            'Rifle': 1,
+            'Scepter': 0,
+            'Shield': 0,
+            'ShortBow': 1,
+            'Spear': 1,
+            'Staff': 1,
+            'Sword': 1,
+            'Torch': 0,
+            'Trident': 0,
+            'Warhorn': 0}
 
     donations = list()
     personal_gear_types = dict()
@@ -113,9 +191,10 @@ def get_char_personal_gear_items(api_wrapper, char_string, char_values):
 
     for filled_slot in filled_slots:
         for_donation = True
-        id_string = get_item_string(dbc, api_wrapper, ITEM, filled_slot['id'])
+        local_dbc = DBConnector()
+        id_string = get_item_string(local_dbc, 'item', filled_slot['id'])
         #pdb.set_trace()
-        slot_item = gw2item.ItemSlot(json.dumps(filled_slot), char_json['name'], id_string)
+        slot_item = ItemSlot(json.dumps(filled_slot), char_json['name'], id_string)
         if slot_item.show_type() in relevant_types:
             #pdb.set_trace()
             for personal_gear_type in personal_gear_types:

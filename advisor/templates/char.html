@@ -5,4 +5,10 @@
 {% block content %}
 <p> Content: {{ content }}</p>
 <p> Last update: {{ timestamp }} </p>
+<p> char equip: {{ char_personal_equip }} </p>
+<ul>
+{% for equip in char_personal_equip %}
+<li>{{ equip }}: {{ char_personal_equip[equip] }}</li>
+{% endfor %}
+</ul>
 {% endblock %}

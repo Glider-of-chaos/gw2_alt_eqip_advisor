@@ -68,17 +68,18 @@ class DBConnector():
         #self.curs.execute("insert into characters (char_name, char_json) values ('test_name', '{tst:json}')")
 
     def get_item_json(self, item_type, item_id):
-        connection = mysql.connector.connect(**self.connection_details)
+        #connection = mysql.connector.connect(**self.connection_details)
+        connection = get_db()
         cursor = connection.cursor()
 
         item_select = "SELECT json_string FROM `{0}` WHERE id = '{1}'".format(item_type, item_id)
         cursor.execute(item_select)
         select_result = cursor.fetchall()
         #pdb.set_trace()
-        row_count = cursor.rowcount
+        row_count = len(select_result)
         if row_count == 1:
-            item_json = select_result[0][0].decode()
-            connection.close()
+            item_json = select_result[0][0]
+            #connection.close()
         elif row_count == 0:
             connection.close()
             raise exceptions.NoDBItemError(item_id)
