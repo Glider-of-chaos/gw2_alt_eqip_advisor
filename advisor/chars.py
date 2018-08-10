@@ -177,7 +177,7 @@ def get_char_personal_gear_items(char_string, char_values):
 
     for armor in armor_count:
         for i in range(armor_count[armor]):
-            slot_name = f'{armor}_{armor_count[armor]}'
+            slot_name = f'{armor}_{i+1}'
             personal_gear_types[slot_name] = armor
             personal_gear_scores[slot_name] = 0
 
@@ -185,7 +185,7 @@ def get_char_personal_gear_items(char_string, char_values):
         #print(weapon)
         #print(personal_weapon_list[weapon])
         for i in range(int(personal_weapon_list[weapon])):
-            slot_name = f'{weapon}_{personal_weapon_list[weapon]}'
+            slot_name = f'{weapon}_{i+1}'
             personal_gear_types[slot_name] = weapon
             personal_gear_scores[slot_name] = 0
 

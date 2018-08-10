@@ -68,16 +68,12 @@ class ItemSlot:
             self.flat_dict['empty_id'] = True
         else:
             self.id_string = id_string
-            #id_string2='{\n  "name": "Wegloop\'s Air Mask",\n  "description": "",\n  "type": "Armor",\n"level": 80,\n  "rarity": "Ascended",\n  "vendor_value": 413,\n  "default_skin": 1995,\n  "game_types": [\n    "Activity",\n    "Wvw",\n    "Dungeon",\n    "Pve"\n  ],\n  "flags": [\n    "HideSuffix",\n    "AccountBound",\n    "AccountBindOnUse"\n  ],\n  "restrictions": [],\n  "id": 79838,\n  "chat_link": "[&AgHeNwEA]",\n  "icon": "https://render.guildwars2.com/file/0C500B9CC36790FCC297F21907C72E7C52450E39/638363.png",\n  "details": {\n    "type": "HelmAquatic",\n    "weight_class": "Medium",\n    "defense": 102,\n    "infusion_slots": [\n      {\n  "flags": [\n          "Infusion"\n        ]\n      }\n    ],\n    "secondary_suffix_item_id": "",\n    "stat_choices": [\n      1377,\n      1379,\n      1378,\n      155,\n      161,\n      159,\n      157,\n      158,\n      160,\n 153,\n      605,\n      700,\n      616,\n      154,\n      156,\n      162,\n     686,\n      559,\n      754,\n      753,\n      799,\n      1026,\n      1067,\n      1226,\n      1225,\n      1229,\n      1224,\n      1228,\n      1227,\n      1231,\n      1232,\n      1230\n    ]\n  }\n}'
-            #id_string3 = '{\\n  "name": "Wegloop\'s Air Mask",\\n  "description": "",\\n  "type": "Armor",\\n"level": 80,\\n  "rarity": "Ascended",\\n  "vendor_value": 413,\\n  "default_skin": 1995,\\n  "game_types": [\\n    "Activity",\\n    "Wvw",\\n    "Dungeon",\\n    "Pve"\\n  ],\\n  "flags": [\\n    "HideSuffix",\\n    "AccountBound",\\n    "AccountBindOnUse"\\n  ],\\n  "restrictions": [],\\n  "id": 79838,\\n  "chat_link": "[&AgHeNwEA]",\\n  "icon": "https://render.guildwars2.com/file/0C500B9CC36790FCC297F21907C72E7C52450E39/638363.png",\\n  "details": {\\n    "type": "HelmAquatic",\\n    "weight_class": "Medium",\\n    "defense": 102,\\n    "infusion_slots": [\\n      {\\n  "flags": [\\n          "Infusion"\\n        ]\\n      }\\n    ],\\n    "secondary_suffix_item_id": "",\\n    "stat_choices": [\\n      1377,\\n      1379,\\n      1378,\\n      155,\\n      161,\\n      159,\\n      157,\\n      158,\\n      160,\\n 153,\\n      605,\\n      700,\\n      616,\\n      154,\\n      156,\\n      162,\\n     686,\\n      559,\\n      754,\\n      753,\\n      799,\\n      1026,\\n      1067,\\n      1226,\\n      1225,\\n      1229,\\n      1224,\\n      1228,\\n      1227,\\n      1231,\\n      1232,\\n      1230\\n    ]\\n  }\\n}'
-            #id_string = id_string.replace("\\n","\n")
+            
             id_string = id_string.replace("\\\\n","")
             id_string = id_string.replace("\\n","")
             id_string = id_string.replace('\\\\"','')
             #print('=========')
             #print(id_string)
-            #print('=========')
-            #print(id_string3)
             #print('=========')
             self.id_json = json.loads(id_string)
             self.flat_dict['name'] = self.id_json['name']
