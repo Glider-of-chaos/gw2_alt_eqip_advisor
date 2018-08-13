@@ -5,7 +5,49 @@
 {% block content %}
 <ul>
     {% for name in char_names %}
-    <li><a href="{{ url_for('chars.char', char_name = name) }}">{{ name }}</a></li>
+    <li><a href="{{ url_for('chars.char', char_name = name) }}">{{ name }}</a>
+        <br>
+        Set stat preferences (+)
+        <form method="post">
+            primary:
+            <select name="{{name}}_primary_att_name" id="{{name}}_primary_att_id">
+                <option value=""></option>
+                {% for attribute in attributes %}
+                <option value="{{ attribute }}"
+                        {% if char_prefs[name]['primary'] == attribute %}
+                        selected
+                        {% endif %}
+                >{{ attribute }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            secondary 1:
+            <select name="{{name}}_secondary1_att_name" id="{{name}}_secondary1_att_id">
+                <option value=""></option>
+                {% for attribute in attributes %}
+                <option value="{{ attribute }}"
+                        {% if char_prefs[name]['secondary1'] == attribute %}
+                        selected
+                        {% endif %}
+                >{{ attribute }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            secondary 2:
+            <select name="{{name}}_secondary2_att_name" id="{{name}}_secondary2_att_id">
+                <option value=""></option>
+                {% for attribute in attributes %}
+                <option value="{{ attribute }}"
+                        {% if char_prefs[name]['secondary2'] == attribute %}
+                        selected
+                        {% endif %}
+                >{{ attribute }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <input type="submit" name="{{name}}_submit" value="set">
+        </form>
+    </li>
     {% endfor %}
 </ul>
 {% endblock %}

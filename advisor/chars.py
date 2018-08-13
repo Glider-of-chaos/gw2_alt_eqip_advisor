@@ -1,5 +1,6 @@
 import functools
 import json
+import re
 
 from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
 from flask import Flask
@@ -13,22 +14,72 @@ from .gw2item import ItemSlot
 
 char_blueprint = Blueprint('chars', __name__, url_prefix = '/char')
 
+attributes = ('BoonDuration',
+            'ConditionDamage',
+            'ConditionDuration',
+            'CritDamage',
+            'Healing',
+            'Power',
+            'Precision',
+            'Toughness',
+            'Vitality')
 
-@char_blueprint.route('/list', methods = ('GET', ))
+
+@char_blueprint.route('/list', methods = ('GET', 'POST'))
 def char_list():
+    g.attributes = ('BoonDuration',
+            'ConditionDamage',
+            'ConditionDuration',
+            'CritDamage',
+            'Healing',
+            'Power',
+            'Precision',
+            'Toughness',
+            'Vitality')
+
+    db = get_db()
+    error = None
+
+    chars = db.execute(f"SELECT character.id FROM character LEFT JOIN api_key\
+            ON character.api_id=api_key.id\
+            WHERE api_key.key_value = '{g.api_key}'").fetchall()
+
+    g.char_names = [char[0] for char in chars]
+    
+    try:
+        session['char_att_prefs']
+        for char_name in g.char_names:
+            session['char_att_prefs'][char_name]
+    except (AttributeError, KeyError):
+        session['char_att_prefs'] = dict()
+        for char_name in g.char_names:
+            session['char_att_prefs'][char_name] = dict()
+            session['char_att_prefs'][char_name]['primary'] = ''
+            session['char_att_prefs'][char_name]['secondary1'] = ''
+            session['char_att_prefs'][char_name]['secondary2'] = ''
+
     if request.method == 'GET':
-        db = get_db()
-        error = None
-        #api_wrapper = ApiWrapper(g.api_key)
-        #chars_json = api_wrapper.get_json_string('characters', None)
+        pass
+        #return render_template('characters.html', char_names = g.char_names, attributes = g.attributes)
+    elif request.method == 'POST':
+        #for char in 
+        #primary_att = request.form['primary_att_name']
+        
+        first_form_name = list(request.form.keys())[0]
+        char_name = re.search('([^_]+)_', first_form_name).group(1)
+        session['char_att_prefs'][char_name]['primary'] = request.form[f'{char_name}_primary_att_name']
+        session['char_att_prefs'][char_name]['secondary1'] = request.form[f'{char_name}_secondary1_att_name']
+        session['char_att_prefs'][char_name]['secondary2'] = request.form[f'{char_name}_secondary2_att_name']
 
-        chars = db.execute(f"SELECT character.id FROM character LEFT JOIN api_key\
-                ON character.api_id=api_key.id\
-                WHERE api_key.key_value = '{g.api_key}'").fetchall()
+        print('===')
+        for char in session['char_att_prefs']:
+            print(f'>>>{char}')
+            for char_att in session['char_att_prefs'][char]:
+                print(f'\t{char_att}: {session["char_att_prefs"][char][char_att]}')
+        print('===')
+        
+    return render_template('characters.html', char_names = g.char_names, attributes = g.attributes, char_prefs = session['char_att_prefs'])
 
-        char_names = [char[0] for char in chars]
-
-        return render_template('characters.html', char_names = char_names)
 
 
 @char_blueprint.route('/<char_name>', methods = ('GET', ))
