@@ -16,6 +16,7 @@ def set_api_key():
         if not api_key:
             error = 'API key is required'
         else:
+            print('>>>>>>>>>>>>>>>>>>>>clearing session !!!!!!!!!!!!!!!!!!!!!!<<<<<<<<<<<<<<<<<<<<')
             session.clear()
             session['api_key'] = api_key
             return redirect(url_for('chars.char_list'))

@@ -24,7 +24,6 @@ attributes = ('BoonDuration',
             'Toughness',
             'Vitality')
 
-
 @char_blueprint.route('/list', methods = ('GET', 'POST'))
 def char_list():
     g.attributes = ('BoonDuration',
@@ -47,16 +46,34 @@ def char_list():
     g.char_names = [char[0] for char in chars]
     
     try:
+        print('=== exisiting prefs check ===')
         session['char_att_prefs']
         for char_name in g.char_names:
             session['char_att_prefs'][char_name]
-    except (AttributeError, KeyError):
-        session['char_att_prefs'] = dict()
+        print('=== exisiting prefs pass ===')
+        print('===exisiting char logs ===')
+        for char in session['char_att_prefs']:
+            print(f'>>>{char}')
+            for char_att in session['char_att_prefs'][char]:
+                print(f'\t{char_att}: {session["char_att_prefs"][char][char_att]}')
+        print('===exisiting char logs ===')
+    except (AttributeError, KeyError, NameError):
+        print('=== exisiting prefs fail ===')
+        char_att_prefs = dict()
         for char_name in g.char_names:
-            session['char_att_prefs'][char_name] = dict()
-            session['char_att_prefs'][char_name]['primary'] = ''
-            session['char_att_prefs'][char_name]['secondary1'] = ''
-            session['char_att_prefs'][char_name]['secondary2'] = ''
+            char_att_prefs[char_name] = dict()
+            print('=== why are we here again ===')
+            char_att_prefs[char_name]['primary'] = ''
+            char_att_prefs[char_name]['secondary1'] = ''
+            char_att_prefs[char_name]['secondary2'] = ''
+        session['char_att_prefs'] = char_att_prefs
+
+    print('===char prefs - beginning ===')
+    for char in session['char_att_prefs']:
+        print(f'>>>{char}')
+        for char_att in session['char_att_prefs'][char]:
+            print(f'\t{char_att}: {session["char_att_prefs"][char][char_att]}')
+    print('===char prefs - beginning ===')
 
     if request.method == 'GET':
         pass
@@ -67,9 +84,13 @@ def char_list():
         
         first_form_name = list(request.form.keys())[0]
         char_name = re.search('([^_]+)_', first_form_name).group(1)
-        session['char_att_prefs'][char_name]['primary'] = request.form[f'{char_name}_primary_att_name']
-        session['char_att_prefs'][char_name]['secondary1'] = request.form[f'{char_name}_secondary1_att_name']
-        session['char_att_prefs'][char_name]['secondary2'] = request.form[f'{char_name}_secondary2_att_name']
+        char_att_prefs = session['char_att_prefs']
+
+        char_att_prefs[char_name]['primary'] = request.form[f'{char_name}_primary_att_name']
+        char_att_prefs[char_name]['secondary1'] = request.form[f'{char_name}_secondary1_att_name']
+        char_att_prefs[char_name]['secondary2'] = request.form[f'{char_name}_secondary2_att_name']
+
+        session['char_att_prefs'] = char_att_prefs
 
         print('===')
         for char in session['char_att_prefs']:
@@ -77,6 +98,7 @@ def char_list():
             for char_att in session['char_att_prefs'][char]:
                 print(f'\t{char_att}: {session["char_att_prefs"][char][char_att]}')
         print('===')
+        return redirect(url_for('chars.char_list'))
         
     return render_template('characters.html', char_names = g.char_names, attributes = g.attributes, char_prefs = session['char_att_prefs'])
 
@@ -92,13 +114,19 @@ def char(char_name):
         char_json = char_row[0]
         creation_time = char_row[1]
 
-
         if char_json is None:
             error = 'Character not found'
 
-        char_values = { 'Power': 1.4,
-                'Precision': 1,
-                'CritDamage':1}
+        print('===char prefs in char===')
+        for char in session['char_att_prefs']:
+            print(f'>>>{char}')
+            for char_att in session['char_att_prefs'][char]:
+                print(f'\t{char_att}: {session["char_att_prefs"][char][char_att]}')
+        print('===char prefs in char===')
+
+        char_values = { session['char_att_prefs'][char_name]['primary']: 1.4,
+                session['char_att_prefs'][char_name]['secondary1']: 1,
+                session['char_att_prefs'][char_name]['secondary1']:1}
         char_personal_equip = get_char_personal_gear_items(char_json, char_values)
 
         flash(error)
